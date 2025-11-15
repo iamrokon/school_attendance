@@ -68,10 +68,13 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 CACHE_DRIVER=redis
+REDIS_CLIENT=predis
 REDIS_HOST=127.0.0.1
 REDIS_PASSWORD=null
 REDIS_PORT=6379
 ```
+
+Note: This project includes `predis/predis` in `backend/composer.json`. If you prefer Predis instead of the PHP `redis` extension, set `REDIS_CLIENT=predis` in your `.env` (shown above). If you haven't installed Predis manually, run `composer require predis/predis` in the `backend` directory.
 
 6. Run migrations:
 ```bash
