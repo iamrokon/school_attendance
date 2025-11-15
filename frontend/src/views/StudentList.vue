@@ -67,6 +67,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../services/api'
 
 const students = ref([])
@@ -100,9 +101,15 @@ const changePage = (page) => {
   loadStudents(page)
 }
 
+const router = useRouter()
+
 const editStudent = (student) => {
-  // Implement edit functionality
-  console.log('Edit student:', student)
+  // Navigate to the student edit route. Adjust path if your router uses a named route.
+  if (!student || !student.id) {
+    console.warn('Invalid student for editing:', student)
+    return
+  }
+  router.push(`/students/${student.id}/edit`)
 }
 
 onMounted(() => {

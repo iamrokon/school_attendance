@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import StudentList from './views/StudentList.vue'
+import StudentEdit from './views/StudentEdit.vue'
 import AttendanceRecording from './views/AttendanceRecording.vue'
 import Dashboard from './views/Dashboard.vue'
 import Login from './views/Login.vue'
@@ -11,6 +12,7 @@ const routes = [
   { path: '/', redirect: '/dashboard' },
   { path: '/login', component: Login },
   { path: '/students', component: StudentList },
+  { path: '/students/:id/edit', component: StudentEdit },
   { path: '/attendance', component: AttendanceRecording },
   { path: '/dashboard', component: Dashboard },
 ]

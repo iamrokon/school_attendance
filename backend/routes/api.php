@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,20 +22,20 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Authentication Routes
-Route::post('/register', [\App\Http\Controllers\Api\AuthController::class, 'register']);
-Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
-Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 // Student Management Routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('students', \App\Http\Controllers\Api\StudentController::class);
-    
+    Route::apiResource('students', StudentController::class);
+
     // Attendance Routes
     Route::prefix('attendances')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\AttendanceController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\AttendanceController::class, 'store']);
-        Route::get('/{attendance}', [\App\Http\Controllers\Api\AttendanceController::class, 'show']);
-        Route::get('/reports/monthly', [\App\Http\Controllers\Api\AttendanceController::class, 'monthlyReport']);
-        Route::get('/statistics/today', [\App\Http\Controllers\Api\AttendanceController::class, 'todayStatistics']);
+        Route::get('/', [AttendanceController::class, 'index']);
+        Route::post('/', [AttendanceController::class, 'store']);
+        Route::get('/{attendance}', [AttendanceController::class, 'show']);
+        Route::get('/reports/monthly', [AttendanceController::class, 'monthlyReport']);
+        Route::get('/statistics/today', [AttendanceController::class, 'todayStatistics']);
     });
 });
