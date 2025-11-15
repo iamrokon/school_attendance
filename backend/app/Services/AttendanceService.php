@@ -16,7 +16,7 @@ class AttendanceService
      */
     public function recordBulkAttendance(array $data, int $recordedBy): Collection
     {
-        $date = $data['date'] ?? Carbon::today();
+        $date = isset($data['date']) ? Carbon::parse($data['date']) : Carbon::today();
         $attendances = collect();
 
         DB::transaction(function () use ($data, $date, $recordedBy, &$attendances) {
@@ -49,7 +49,7 @@ class AttendanceService
     public function getMonthlyReport(string $month, ?string $class = null): array
     {
         $cacheKey = "attendance_report_{$month}_" . ($class ?? 'all');
-        
+
         return Cache::remember($cacheKey, 3600, function () use ($month, $class) {
             $startDate = Carbon::parse($month)->startOfMonth();
             $endDate = Carbon::parse($month)->endOfMonth();
@@ -118,8 +118,8 @@ class AttendanceService
                 'late' => $lateCount,
                 'recorded' => $recordedCount,
                 'not_recorded' => $totalStudents - $recordedCount,
-                'attendance_percentage' => $totalStudents > 0 
-                    ? round(($presentCount / $totalStudents) * 100, 2) 
+                'attendance_percentage' => $totalStudents > 0
+                    ? round(($presentCount / $totalStudents) * 100, 2)
                     : 0,
             ];
         });
@@ -151,7 +151,7 @@ class AttendanceService
     {
         $dateString = $date->format('Y-m-d');
         Cache::forget("attendance_stats_{$dateString}");
-        
+
         // Clear monthly report caches
         $monthKey = $date->format('Y-m');
         Cache::forget("attendance_report_{$monthKey}_all");
