@@ -19,12 +19,16 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import api from './services/api'
 
 const router = useRouter()
+const route = useRoute()
 
+// Re-compute on every route change so we see updated localStorage token after login/logout.
 const isAuthenticated = computed(() => {
+  // access route to make this computed depend on it
+  route.fullPath
   return !!localStorage.getItem('token')
 })
 
