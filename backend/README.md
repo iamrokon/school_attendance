@@ -21,13 +21,71 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+## Project Overview (School Attendance Backend)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Purpose**: Backend API (Laravel 10) for managing students and their daily attendance records in a school.
+- **Key features**:
+  - Student management (CRUD with class, section, unique student_id, and optional photo).
+  - Attendance tracking per day and per student (status: present/absent/late, note, recorded_by user).
+  - Monthly attendance reports per student with optional class filter.
+  - Today’s attendance statistics (present/absent/late counts and percentage).
+  - Sanctum-based API authentication (`auth:sanctum`) protecting student and attendance routes.
+- **Tech stack**: PHP 8.1+, Laravel 10, MySQL, Laravel Sanctum, PHPUnit.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Setup & Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Clone and install dependencies**
+   ```bash
+   git clone <your-repo-url>
+   cd backend
+   composer install
+   ```
+2. **Environment configuration**
+   - Copy `.env.example` to `.env` and generate an app key:
+     ```bash
+     cp .env.example .env
+     php artisan key:generate
+     ```
+   - Configure your main MySQL database in `.env`:
+     - `DB_DATABASE=school_attendance`
+     - `DB_USERNAME=your_mysql_user`
+     - `DB_PASSWORD=your_mysql_password`
+3. **Database migrations and seeders**
+   - Create the main application database in MySQL.
+   - Run migrations (and seeders if desired):
+     ```bash
+     php artisan migrate --seed
+     ```
+4. **Run the development server**
+   ```bash
+   php artisan serve
+   ```
+
+## API Overview
+
+- **Base URL**: `/api/v1`
+
+- **Authentication**
+  - `POST /api/v1/register` – Register a new user and return an API token.
+  - `POST /api/v1/login` – Login and receive an API token.
+  - `POST /api/v1/logout` – Logout (revoke current token); requires `auth:sanctum`.
+
+- **Student endpoints** (protected by `auth:sanctum`)
+  - `GET /api/v1/students` – List students.
+    - Query params: `class`, `section`, `search`, `per_page`.
+  - `POST /api/v1/students` – Create a student.
+  - `GET /api/v1/students/{student}` – Show a student.
+  - `PUT /api/v1/students/{student}` – Update a student.
+  - `DELETE /api/v1/students/{student}` – Delete a student.
+
+- **Attendance endpoints** (protected by `auth:sanctum`, `attendances` prefix)
+  - `GET /api/v1/attendances` – List attendance records.
+    - Query params: `date` (`Y-m-d`), `student_id`, `status`, `per_page`.
+  - `POST /api/v1/attendances` – Record **bulk** attendance for multiple students in one request.
+  - `GET /api/v1/attendances/{attendance}` – Show a single attendance record.
+  - `GET /api/v1/attendances/reports/monthly` – Monthly report.
+    - Query params: `month=YYYY-MM` (required), `class` (optional).
+  - `GET /api/v1/attendances/statistics/today` – Today’s statistics summary.
 
 ## Laravel Sponsors
 
@@ -64,3 +122,26 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Testing (Project-specific)
+
+- **Dedicated MySQL test database**
+  - PHPUnit is configured (via `phpunit.xml`) to use a separate MySQL database for tests:
+    - `DB_CONNECTION=mysql`
+    - `DB_DATABASE=school_attendance_test`
+  - Before running tests, create this database in MySQL (for example, in phpMyAdmin or MySQL CLI):
+    ```sql
+    CREATE DATABASE school_attendance_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    ```
+  - Ensure your `.env` has the correct MySQL credentials (`DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`); tests will reuse those and only override the database name.
+
+- **Running tests**
+  - Full test suite:
+    ```bash
+    php artisan test
+    ```
+  - Only student or attendance feature tests:
+    ```bash
+    php artisan test --filter=StudentTest
+    php artisan test --filter=AttendanceTest
+    ```
