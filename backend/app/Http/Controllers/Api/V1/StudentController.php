@@ -1,17 +1,21 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
-use App\Http\Resources\StudentResource;
+use App\Http\Resources\V1\StudentResource;
 use App\Models\Student;
-use App\Services\StudentService;
+use App\Services\V1\StudentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+/**
+ * Student Controller for API v1.
+ * Standalone copy of the previous StudentController logic using V1 services/resources.
+ */
 class StudentController extends Controller
 {
     public function __construct(
@@ -25,9 +29,9 @@ class StudentController extends Controller
     {
         $filters = $request->only(['class', 'section', 'search']);
         $perPage = $request->get('per_page', 15);
-        
+
         $students = $this->studentService->getStudents($filters, $perPage);
-        
+
         return StudentResource::collection($students);
     }
 
@@ -37,7 +41,7 @@ class StudentController extends Controller
     public function store(StoreStudentRequest $request): JsonResponse
     {
         $student = $this->studentService->createStudent($request->validated());
-        
+
         return response()->json([
             'message' => 'Student created successfully',
             'data' => new StudentResource($student),
@@ -60,7 +64,7 @@ class StudentController extends Controller
     public function update(UpdateStudentRequest $request, Student $student): JsonResponse
     {
         $student = $this->studentService->updateStudent($student, $request->validated());
-        
+
         return response()->json([
             'message' => 'Student updated successfully',
             'data' => new StudentResource($student),
@@ -73,9 +77,10 @@ class StudentController extends Controller
     public function destroy(Student $student): JsonResponse
     {
         $this->studentService->deleteStudent($student);
-        
+
         return response()->json([
             'message' => 'Student deleted successfully',
         ]);
     }
 }
+

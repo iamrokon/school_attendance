@@ -36,7 +36,7 @@ class GenerateAttendanceReport extends Command
         
         $this->info("Generating attendance report for {$month}" . ($class ? " (Class: {$class})" : ''));
         
-        $attendanceService = app(\App\Services\AttendanceService::class);
+        $attendanceService = app(\App\Services\V1\AttendanceService::class);
         $report = $attendanceService->getMonthlyReport($month, $class);
         
         if (empty($report)) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Authentication Controller for API v1.
+ * Standalone copy of the previous AuthController logic.
+ */
 class AuthController extends Controller
 {
     /**
@@ -76,3 +80,4 @@ class AuthController extends Controller
         ]);
     }
 }
+

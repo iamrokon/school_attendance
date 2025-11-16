@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\V1;
 
 use App\Models\Student;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+/**
+ * Student Service for API v1.
+ * Standalone copy of the previous StudentService logic.
+ */
 class StudentService
 {
     /**
@@ -61,4 +65,3 @@ class StudentService
         return $student->delete();
     }
 }
-

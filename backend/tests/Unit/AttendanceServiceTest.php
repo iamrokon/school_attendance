@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use App\Models\Attendance;
 use App\Models\Student;
 use App\Models\User;
-use App\Services\AttendanceService;
+use App\Services\V1\AttendanceService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

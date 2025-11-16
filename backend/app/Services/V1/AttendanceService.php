@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\V1;
 
 use App\Models\Attendance;
 use App\Models\Student;
@@ -9,6 +9,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Attendance Service for API v1.
+ * Standalone copy of the previous AttendanceService logic.
+ */
 class AttendanceService
 {
     /**
@@ -158,4 +162,3 @@ class AttendanceService
         Cache::forget("attendance_report_{$monthKey}_" . $date->format('Y-m'));
     }
 }
-
