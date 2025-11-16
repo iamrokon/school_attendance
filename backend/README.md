@@ -125,15 +125,11 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 ## Testing (Project-specific)
 
-- **Dedicated MySQL test database**
-  - PHPUnit is configured (via `phpunit.xml`) to use a separate MySQL database for tests:
-    - `DB_CONNECTION=mysql`
-    - `DB_DATABASE=school_attendance_test`
-  - Before running tests, create this database in MySQL (for example, in phpMyAdmin or MySQL CLI):
-    ```sql
-    CREATE DATABASE school_attendance_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-    ```
-  - Ensure your `.env` has the correct MySQL credentials (`DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`); tests will reuse those and only override the database name.
+- **In-memory SQLite for tests**
+  - PHPUnit is configured (via `phpunit.xml`) to use an in-memory SQLite database for tests:
+    - `DB_CONNECTION=sqlite`
+    - `DB_DATABASE=:memory:`
+  - This keeps your main MySQL data untouched while running tests.
 
 - **Running tests**
   - Full test suite:
@@ -145,3 +141,18 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
     php artisan test --filter=StudentTest
     php artisan test --filter=AttendanceTest
     ```
+
+## Notes on search & indexing
+
+- **Students search**
+  - In production with MySQL, student name searches use a **FULLTEXT index** on the `name` column (plus a standard index on `student_id` for prefix searches).
+  - In tests with SQLite (which does not support the same FULLTEXT syntax), the service automatically falls back to `LIKE`-based searching on both `name` and `student_id`.
+- **Indexes**
+  - `students`:
+    - Unique index on `student_id`.
+    - Index on `student_id` for lookups.
+    - Composite index on `class`, `section`, `name` to optimize listing and ordering.
+  - `attendances`:
+    - Foreign-key indexes on `student_id` and `recorded_by`.
+    - Unique index on (`student_id`, `date`) to prevent duplicates and speed up `updateOrCreate`.
+    - Index on (`date`, `status`) for statistics and filtering.

@@ -5,6 +5,7 @@ namespace App\Services\V1;
 use App\Models\Attendance;
 use App\Models\Student;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,33 @@ use Illuminate\Support\Facades\DB;
  */
 class AttendanceService
 {
+    /**
+     * Get paginated list of attendances with optional filters.
+     */
+    public function getAttendances(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    {
+        $query = Attendance::with([
+            'student:id,name,student_id,class,section,photo',
+            'recorder:id,name',
+        ]);
+
+        if (!empty($filters['date'])) {
+            $query->whereDate('date', $filters['date']);
+        }
+
+        if (!empty($filters['student_id'])) {
+            $query->where('student_id', $filters['student_id']);
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
     /**
      * Record bulk attendance for multiple students.
      */
@@ -58,9 +86,16 @@ class AttendanceService
             $startDate = Carbon::parse($month)->startOfMonth();
             $endDate = Carbon::parse($month)->endOfMonth();
 
-            $query = Student::with(['attendances' => function ($q) use ($startDate, $endDate) {
+            $query = Student::select([
+                    'id',
+                    'student_id',
+                    'name',
+                    'class',
+                    'section',
+                ])
+                ->with(['attendances' => function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('date', [$startDate, $endDate]);
-            }]);
+                }]);
 
             if ($class) {
                 $query->where('class', $class);

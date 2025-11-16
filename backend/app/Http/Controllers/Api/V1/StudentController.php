@@ -44,7 +44,7 @@ class StudentController extends Controller
 
         return response()->json([
             'message' => 'Student created successfully',
-            'data' => new StudentResource($student),
+            'data' => StudentResource::make($student),
         ], 201);
     }
 
@@ -54,7 +54,7 @@ class StudentController extends Controller
     public function show(Student $student): JsonResponse
     {
         return response()->json([
-            'data' => new StudentResource($student),
+            'data' => StudentResource::make($student),
         ]);
     }
 
@@ -67,7 +67,7 @@ class StudentController extends Controller
 
         return response()->json([
             'message' => 'Student updated successfully',
-            'data' => new StudentResource($student),
+            'data' => StudentResource::make($student),
         ]);
     }
 

@@ -16,7 +16,17 @@ class StudentService
      */
     public function getStudents(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Student::query();
+        $query = Student::query()
+            ->select([
+                'id',
+                'name',
+                'student_id',
+                'class',
+                'section',
+                'photo',
+                'created_at',
+                'updated_at',
+            ]);
 
         if (isset($filters['class'])) {
             $query->where('class', $filters['class']);
@@ -30,9 +40,17 @@ class StudentService
             $search = $filters['search'];
 
             $query->where(function ($q) use ($search) {
-                // Use fulltext search on name (requires FULLTEXT index)
-                $q->whereFullText('name', $search)
-                  ->orWhere('student_id', 'like', "{$search}%");
+                $connection = $q->getModel()->getConnection();
+
+                if ($connection->getDriverName() === 'sqlite') {
+                    // SQLite: fall back to LIKE search
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('student_id', 'like', "{$search}%");
+                } else {
+                    // MySQL (or drivers with FULLTEXT support)
+                    $q->whereFullText('name', $search)
+                      ->orWhere('student_id', 'like', "{$search}%");
+                }
             });
         }
 

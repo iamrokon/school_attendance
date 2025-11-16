@@ -27,23 +27,10 @@ class AttendanceController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Attendance::with(['student', 'recorder']);
+        $filters = $request->only(['date', 'student_id', 'status']);
+        $perPage = $request->get('per_page', 15);
 
-        if ($request->has('date')) {
-            $query->whereDate('date', $request->date);
-        }
-
-        if ($request->has('student_id')) {
-            $query->where('student_id', $request->student_id);
-        }
-
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $attendances = $query->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate($request->get('per_page', 15));
+        $attendances = $this->attendanceService->getAttendances($filters, $perPage);
 
         return AttendanceResource::collection($attendances);
     }

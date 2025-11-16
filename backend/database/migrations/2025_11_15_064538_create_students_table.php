@@ -23,8 +23,10 @@ return new class extends Migration
             // Index to speed up lookups by student_id
             $table->index('student_id');
 
-            // Fulltext index for faster searching on the name field
-            $table->fullText('name');
+            // Fulltext index for faster searching on the name field (not supported by SQLite)
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->fullText('name');
+            }
 
             // Composite index to optimize common listing/filter queries and ordering
             $table->index(['class', 'section', 'name']);
