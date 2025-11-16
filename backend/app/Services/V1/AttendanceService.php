@@ -5,7 +5,7 @@ namespace App\Services\V1;
 use App\Models\Attendance;
 use App\Models\Student;
 use Carbon\Carbon;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -38,9 +38,39 @@ class AttendanceService
             $query->where('status', $filters['status']);
         }
 
-        return $query->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        // Build cache key from filters + pagination
+        $page = request()->get('page', 1);
+        $cacheKey = 'attendances:list:' . md5(json_encode([$filters, 'per' => $perPage, 'page' => $page]));
+
+        $cached = Cache::tags(['attendances'])->get($cacheKey);
+        if ($cached) {
+            return new LengthAwarePaginator(
+                $cached['data'],
+                $cached['total'],
+                $cached['per_page'],
+                $cached['current_page'],
+                [
+                    'path' => LengthAwarePaginator::resolveCurrentPath(),
+                    'pageName' => 'page',
+                ]
+            );
+        }
+
+        $paginator = $query->orderBy('date', 'desc')
+                    ->orderBy('created_at', 'desc')
+                    ->paginate($perPage);
+
+        $paginatorArray = [
+            'data' => array_map(function ($item) { return $item->toArray(); }, $paginator->items()),
+            'total' => $paginator->total(),
+            'per_page' => $paginator->perPage(),
+            'current_page' => $paginator->currentPage(),
+            'last_page' => $paginator->lastPage(),
+        ];
+
+        Cache::tags(['attendances'])->put($cacheKey, $paginatorArray, now()->addMinutes(60));
+
+        return $paginator;
     }
 
     /**
@@ -70,6 +100,8 @@ class AttendanceService
 
             // Clear cache for this date
             $this->clearAttendanceCache($date);
+            // Invalidate attendances list cache
+            Cache::tags(['attendances'])->flush();
         });
 
         return $attendances;

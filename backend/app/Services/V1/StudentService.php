@@ -4,6 +4,8 @@ namespace App\Services\V1;
 
 use App\Models\Student;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 /**
  * Student Service for API v1.
@@ -52,10 +54,42 @@ class StudentService
             });
         }
 
-        return $query->orderBy('class')
+        // Build a cache key from filters + pagination query param
+        $page = request()->get('page', 1);
+        $cacheKey = 'students:list:' . md5(json_encode([$filters, 'per' => $perPage, 'page' => $page]));
+
+        $cached = Cache::tags(['students'])->get($cacheKey);
+        if ($cached) {
+            // Rebuild LengthAwarePaginator from cached array
+            return new LengthAwarePaginator(
+                $cached['data'],
+                $cached['total'],
+                $cached['per_page'],
+                $cached['current_page'],
+                [
+                    'path' => LengthAwarePaginator::resolveCurrentPath(),
+                    'pageName' => 'page',
+                ]
+            );
+        }
+
+        $paginator = $query->orderBy('class')
                     ->orderBy('section')
                     ->orderBy('name')
                     ->paginate($perPage);
+
+        // Cache paginated result for 60 minutes under the 'students' tag
+        $paginatorArray = [
+            'data' => $paginator->items(),
+            'total' => $paginator->total(),
+            'per_page' => $paginator->perPage(),
+            'current_page' => $paginator->currentPage(),
+            'last_page' => $paginator->lastPage(),
+        ];
+
+        Cache::tags(['students'])->put($cacheKey, $paginatorArray, now()->addMinutes(60));
+
+        return $paginator;
     }
 
     /**
@@ -63,7 +97,10 @@ class StudentService
      */
     public function createStudent(array $data): Student
     {
-        return Student::create($data);
+        $student = Student::create($data);
+        // Invalidate student caches (list and single entries)
+        Cache::tags(['students'])->flush();
+        return $student;
     }
 
     /**
@@ -72,6 +109,8 @@ class StudentService
     public function updateStudent(Student $student, array $data): Student
     {
         $student->update($data);
+        // Clear cache so next reads are fresh
+        Cache::tags(['students'])->flush();
         return $student->fresh();
     }
 
@@ -80,6 +119,10 @@ class StudentService
      */
     public function deleteStudent(Student $student): bool
     {
-        return $student->delete();
+        $result = $student->delete();
+        if ($result) {
+            Cache::tags(['students'])->flush();
+        }
+        return $result;
     }
 }
