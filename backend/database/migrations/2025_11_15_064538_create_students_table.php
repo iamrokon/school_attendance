@@ -19,6 +19,15 @@ return new class extends Migration
             $table->string('section');
             $table->string('photo')->nullable();
             $table->timestamps();
+
+            // Index to speed up lookups by student_id
+            $table->index('student_id');
+
+            // Fulltext index for faster searching on the name field
+            $table->fullText('name');
+
+            // Composite index to optimize common listing/filter queries and ordering
+            $table->index(['class', 'section', 'name']);
         });
     }
 

@@ -60,7 +60,8 @@ class AttendanceController extends Controller
 
         // Dispatch event for each attendance record
         foreach ($attendances as $attendance) {
-            event(new AttendanceRecorded($attendance));
+            AttendanceRecorded::dispatch($attendance);
+            // event(new AttendanceRecorded($attendance));
         }
 
         return response()->json([
@@ -77,7 +78,7 @@ class AttendanceController extends Controller
         $attendance->load(['student', 'recorder']);
 
         return response()->json([
-            'data' => new AttendanceResource($attendance),
+            'data' => AttendanceResource::make($attendance),
         ]);
     }
 

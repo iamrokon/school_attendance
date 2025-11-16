@@ -28,9 +28,11 @@ class StudentService
 
         if (isset($filters['search'])) {
             $search = $filters['search'];
+
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('student_id', 'like', "%{$search}%");
+                // Use fulltext search on name (requires FULLTEXT index)
+                $q->whereFullText('name', $search)
+                  ->orWhere('student_id', 'like', "{$search}%");
             });
         }
 
