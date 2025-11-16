@@ -56,9 +56,6 @@ class StudentTest extends TestCase
                              'student_id',
                              'class',
                              'section',
-                             'photo',
-                             'created_at',
-                             'updated_at',
                          ],
                      ],
                  ])

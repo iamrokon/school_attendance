@@ -24,9 +24,6 @@ class StudentResource extends JsonResource
             'student_id' => $this->student_id,
             'class' => $this->class,
             'section' => $this->section,
-            'photo' => $this->photo,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }

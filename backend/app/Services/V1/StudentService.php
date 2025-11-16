@@ -16,6 +16,7 @@ class StudentService
      */
     public function getStudents(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
+        // Only select fields that are actually needed by the API responses
         $query = Student::query()
             ->select([
                 'id',
@@ -23,9 +24,6 @@ class StudentService
                 'student_id',
                 'class',
                 'section',
-                'photo',
-                'created_at',
-                'updated_at',
             ]);
 
         if (isset($filters['class'])) {

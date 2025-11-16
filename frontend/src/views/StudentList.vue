@@ -86,11 +86,13 @@ const loadStudents = async (page = 1) => {
       ...filters.value,
     }
     const response = await api.get('/students', { params })
+    // Laravel resource pagination structure: data + meta
     students.value = response.data.data
+    const meta = response.data.meta || {}
     pagination.value = {
-      current_page: response.data.current_page,
-      last_page: response.data.last_page,
-      per_page: response.data.per_page,
+      current_page: meta.current_page || 1,
+      last_page: meta.last_page || 1,
+      per_page: meta.per_page || pagination.value.per_page,
     }
   } catch (error) {
     console.error('Error loading students:', error)

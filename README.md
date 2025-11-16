@@ -148,7 +148,13 @@ php artisan attendance:generate-report 2024-01 10
 
 ## Testing
 
-Run the test suite:
+- **Backend tests (SQLite in-memory)**
+  - The backend test suite uses an in-memory SQLite database, configured via `backend/phpunit.xml`:
+    - `DB_CONNECTION=sqlite`
+    - `DB_DATABASE=:memory:`
+  - This keeps your main MySQL/PostgreSQL data untouched while running tests.
+
+Run the test suite from the `backend` directory:
 ```bash
 cd backend
 php artisan test
