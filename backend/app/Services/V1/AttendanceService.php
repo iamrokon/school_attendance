@@ -202,7 +202,7 @@ class AttendanceService
     public function getStatisticsByDateRange(Carbon $startDate, Carbon $endDate): array
     {
         $attendances = Attendance::whereBetween('date', [$startDate, $endDate])
-            ->select('status', DB::raw('count(*) as count'))
+            ->selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
